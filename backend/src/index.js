@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
-import brochureRoutes, { clearCache } from './routes/brochures.js';
+import brochureRoutes, { clearCache, setInitialScrapeReady } from './routes/brochures.js';
 import { getDb } from './db.js';
 import { scrape } from './scraper.js';
 import { startKeepAlive } from './keep-alive.js';
@@ -52,12 +52,13 @@ startKeepAlive();
 
 // Run initial scrape on startup
 console.log('[startup] Running initial scrape...');
-scrape()
+const initialScrape = scrape()
   .then((result) => {
     clearCache();
     console.log('[startup] Initial scrape complete:', result);
   })
   .catch((err) => console.error('[startup] Initial scrape failed:', err.message));
+setInitialScrapeReady(initialScrape);
 
 app.listen(PORT, () => {
   console.log(`[server] Listening on http://localhost:${PORT}`);
