@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Analytics } from '@vercel/analytics/react';
 import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
@@ -33,6 +32,12 @@ export default function App() {
         { tag: 'meta', attrs: { name: 'apple-mobile-web-app-title', content: 'Parkside Brochures' } },
         { tag: 'link', attrs: { rel: 'manifest', href: '/site.webmanifest' } },
       ];
+
+      // Vercel Analytics
+      const analyticsScript = document.createElement('script');
+      analyticsScript.defer = true;
+      analyticsScript.src = '/_vercel/insights/script.js';
+      document.head.appendChild(analyticsScript);
       tags.forEach(({ tag, attrs }) => {
         const el = document.createElement(tag);
         Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
@@ -45,7 +50,6 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <HomeScreen />
-      {Platform.OS === 'web' && <Analytics />}
     </SafeAreaProvider>
   );
 }
