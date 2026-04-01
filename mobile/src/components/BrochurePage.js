@@ -4,7 +4,6 @@ import { View, Image, Text, StyleSheet, TouchableOpacity, useWindowDimensions } 
 const ASPECT_RATIO = 2400 / 1398;
 const GAP = 8;
 const PADDING = 12;
-const MAX_TILE_WIDTH = 220;
 const MAX_CONTAINER_WIDTH = 500;
 
 export default function BrochurePage({ page, onPress }) {

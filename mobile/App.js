@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Analytics } from '@vercel/analytics/react';
 import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="light" />
       <HomeScreen />
+      {Platform.OS === 'web' && <Analytics />}
     </SafeAreaProvider>
   );
 }

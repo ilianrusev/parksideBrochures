@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
-  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BrochurePage from "../components/BrochurePage";
@@ -21,10 +20,6 @@ const LOGOS = {
   lidl: require("../../assets/lidl-logo.png"),
   kaufland: require("../../assets/kaufland-logo.png"),
 };
-
-const MAX_TILE_WIDTH = 220;
-const GAP = 8;
-const PADDING = 12;
 
 function chunkItems(items, columns) {
   const rows = [];
@@ -93,16 +88,14 @@ export default function HomeScreen() {
   }, [activeSource, brochures, activeBrochureId]);
 
   const activeBrochure = brochures.find((b) => b.brochureId === activeBrochureId);
-  const { width: screenWidth } = useWindowDimensions();
-  const containerWidth = Math.min(screenWidth, 500);
   const columns = 2;
   const rows = activeBrochure ? chunkItems(activeBrochure.allPages, columns) : [];
 
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#1a7a2e" />
-        <Text style={styles.loadingText}>Loading Parkside pages...</Text>
+        <ActivityIndicator size="large" color="#04412C" />
+        <Text style={styles.loadingText}>Зареждаме Parkside предложения...</Text>
       </View>
     );
   }
