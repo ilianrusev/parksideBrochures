@@ -6,9 +6,9 @@ import {
   cleanupOldBrochures,
 } from './db.js';
 
-const LIDL_URL = process.env.BROCHURE_URL || 'https://www.lidl.bg/c/broshura/s10020060';
-const KAUFLAND_URL = process.env.KAUFLAND_URL || 'https://www.kaufland.bg/broshuri.html';
-const FLYER_API = 'https://endpoints.leaflets.schwarz/v4/flyer';
+const LIDL_URL = process.env.BROCHURE_URL;
+const KAUFLAND_URL = process.env.KAUFLAND_URL;
+const FLYER_API = process.env.FLYER_API;
 const PARKSIDE_PATTERN = /parkside/i;
 
 /** Format "2026-03-30" → "30.03.2026" */

@@ -7,8 +7,8 @@ import { getDb } from './db.js';
 import { scrape } from './scraper.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const CRON_SCHEDULE = process.env.CRON_SCHEDULE || '0 */6 * * *';
+const PORT = process.env.PORT;
+const CRON_SCHEDULE = process.env.CRON_SCHEDULE;
 
 app.use(cors());
 app.use(express.json());
