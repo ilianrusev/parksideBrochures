@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Image, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 
 const ASPECT_RATIO = 2400 / 1398;
 const GAP = 8;
@@ -18,9 +18,6 @@ export default function BrochurePage({ page, onPress }) {
       onPress={() => onPress && onPress(page)}
       activeOpacity={0.8}
     >
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>p. {page.page_number}</Text>
-      </View>
       <Image
         source={{ uri: page.image_url }}
         style={{ width: tileWidth, height: tileHeight }}
@@ -40,20 +37,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.12,
     shadowRadius: 3,
-  },
-  badge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: 'rgba(4,65,44,0.85)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    zIndex: 1,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
   },
 });

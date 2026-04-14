@@ -40,6 +40,7 @@ export default function HomeScreen() {
   const [activeSource, setActiveSource] = useState("lidl");
   const [activeBrochureId, setActiveBrochureId] = useState(null);
   const [viewerPage, setViewerPage] = useState(null);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   const loadPages = useCallback(async () => {
     try {
@@ -90,6 +91,15 @@ export default function HomeScreen() {
   const activeBrochure = brochures.find((b) => b.brochureId === activeBrochureId);
   const columns = 2;
   const rows = activeBrochure ? chunkItems(activeBrochure.allPages, columns) : [];
+  const allPages = activeBrochure ? activeBrochure.allPages : [];
+
+  const handleOpenViewer = useCallback((page) => {
+    const idx = allPages.findIndex(
+      (p) => p.brochure_id === page.brochure_id && p.page_number === page.page_number
+    );
+    setViewerIndex(idx >= 0 ? idx : 0);
+    setViewerPage(page);
+  }, [allPages]);
 
   if (loading) {
     return (
@@ -205,7 +215,7 @@ export default function HomeScreen() {
                 <BrochurePage
                   key={`${page.brochure_id}-${page.page_number}`}
                   page={page}
-                  onPress={setViewerPage}
+                  onPress={handleOpenViewer}
                 />
               ))}
             </View>
@@ -217,7 +227,12 @@ export default function HomeScreen() {
         />
       )}
 
-      <ImageViewer page={viewerPage} visible={!!viewerPage} onClose={() => setViewerPage(null)} />
+      <ImageViewer
+        pages={allPages}
+        initialIndex={viewerIndex}
+        visible={!!viewerPage}
+        onClose={() => setViewerPage(null)}
+      />
     </SafeAreaView>
     </View>
   );

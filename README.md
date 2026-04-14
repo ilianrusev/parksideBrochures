@@ -11,9 +11,9 @@ A web/mobile app that automatically scrapes **Lidl** and **Kaufland** Bulgaria b
 3. Calls the leaflets API to get page-level data with keywords and links
 4. Detects Parkside pages by searching keywords and links
 5. Stores results in a local **SQLite** database with in-memory response caching
-6. A **cron job** re-scrapes daily to pick up new brochures
-7. A **self-ping cron** hits endpoint every 14 min (08:00–23:00 Bulgarian time) to prevent backend from sleeping when using free plans (for example Render.com)
-8. The **app** displays Parkside pages with tab navigation (Lidl/Kaufland) and date-based brochure picker
+6. A **cron job** re-scrapes on schedule to pick up new brochures (retries failed sources after 30 min)
+7. A **self-ping cron** hits the health endpoint every 14 min (24/7) to prevent the backend from sleeping on free-tier hosts (e.g. Render.com)
+8. The **app** displays Parkside pages with tab navigation (Lidl/Kaufland), date-based brochure picker, and fullscreen viewer with arrow navigation
 
 ## Project Structure
 
@@ -24,7 +24,7 @@ parkside-brochure/
 │   │   ├── index.js          # Express server + cron scheduler
 │   │   ├── scraper.js         # Lidl + Kaufland scraping logic
 │   │   ├── db.js              # SQLite database layer
-│   │   ├── keep-alive.js      # Self-ping cron (08:00–23:00 BG time)
+│   │   ├── keep-alive.js      # Self-ping cron (every 14 min, 24/7)
 │   │   ├── routes/
 │   │   │   └── brochures.js   # REST API endpoints
 │   │   └── scrape-once.js     # Standalone scrape test script
@@ -41,7 +41,7 @@ parkside-brochure/
     │   │   └── HomeScreen.js  # Tab nav + date picker + grid
     │   └── components/
     │       ├── BrochurePage.js # Grid tile component
-    │       └── ImageViewer.js  # Fullscreen pinch-to-zoom viewer
+    │       └── ImageViewer.js  # Fullscreen viewer with arrows + pinch-to-zoom
     ├── app.json
     └── package.json
 ```
