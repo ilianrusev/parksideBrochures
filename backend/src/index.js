@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cron from 'node-cron';
-import brochureRoutes, { clearCache, setInitialScrapeReady } from './routes/brochures.js';
+import brochureRoutes, { clearCache } from './routes/brochures.js';
 import { getDb } from './db.js';
 import { scrape } from './scraper.js';
 import { startKeepAlive } from './keep-alive.js';
@@ -37,28 +37,34 @@ app.get('/health', (req, res) => {
 getDb();
 
 // Schedule cron job
-cron.schedule(CRON_SCHEDULE, async () => {
-  console.log(`[cron] Scheduled scrape triggered at ${new Date().toISOString()}`);
+const RETRY_DELAY_MS = 30 * 60 * 1000; // 30 minutes
+
+async function scrapeWithRetry(label) {
   try {
-    await scrape();
+    console.log(`[${label}] Running scrape...`);
+    const result = await scrape();
     clearCache();
+    console.log(`[${label}] Scrape complete:`, result);
+
+    if (result.failedSources && result.failedSources.length > 0) {
+      console.log(`[${label}] Sources failed: ${result.failedSources.join(', ')} — retrying in 30 min`);
+      setTimeout(() => scrapeWithRetry(`${label}-retry`), RETRY_DELAY_MS);
+    }
   } catch (err) {
-    console.error('[cron] Scrape failed:', err.message);
+    console.error(`[${label}] Scrape failed:`, err.message, '— retrying in 30 min');
+    setTimeout(() => scrapeWithRetry(`${label}-retry`), RETRY_DELAY_MS);
   }
+}
+
+cron.schedule(CRON_SCHEDULE, () => {
+  scrapeWithRetry('cron');
 });
 
 // Keep-alive
 startKeepAlive();
 
 // Run initial scrape on startup
-console.log('[startup] Running initial scrape...');
-const initialScrape = scrape()
-  .then((result) => {
-    clearCache();
-    console.log('[startup] Initial scrape complete:', result);
-  })
-  .catch((err) => console.error('[startup] Initial scrape failed:', err.message));
-setInitialScrapeReady(initialScrape);
+scrapeWithRetry('startup');
 
 app.listen(PORT, () => {
   console.log(`[server] Listening on http://localhost:${PORT}`);

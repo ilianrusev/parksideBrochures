@@ -145,13 +145,16 @@ export async function scrape() {
 
   try {
     // Fetch from both sources in parallel
+    const failedSources = [];
     const [lidlFlyers, kauflandFlyers] = await Promise.all([
       fetchLidlFlyers().catch(err => {
         console.error('[scraper] Lidl fetch failed:', err.message);
+        failedSources.push('lidl');
         return [];
       }),
       fetchKauflandFlyers().catch(err => {
         console.error('[scraper] Kaufland fetch failed:', err.message);
+        failedSources.push('kaufland');
         return [];
       }),
     ]);
@@ -211,7 +214,7 @@ export async function scrape() {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`[scraper] Done in ${elapsed}s — ${totalParksidePages} Parkside pages from ${allFlyers.length} brochures (Lidl: ${lidlFlyers.length}, Kaufland: ${kauflandFlyers.length})`);
 
-    return { flyersProcessed: allFlyers.length, parksidePages: totalParksidePages };
+    return { flyersProcessed: allFlyers.length, parksidePages: totalParksidePages, failedSources };
   } catch (err) {
     console.error('[scraper] Scrape failed:', err.message);
     throw err;
