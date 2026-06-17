@@ -100,6 +100,16 @@ export function getParksidePagesByBrochure(brochureId) {
   `).all(brochureId);
 }
 
+export function removeUnlistedBrochures(source, currentUrls) {
+  const db = getDb();
+  if (!currentUrls.length) return { changes: 0 };
+  const placeholders = currentUrls.map(() => '?').join(',');
+  return db.prepare(`
+    DELETE FROM brochures
+    WHERE source = ? AND url NOT IN (${placeholders})
+  `).run(source, ...currentUrls);
+}
+
 export function cleanupOldBrochures(maxAgeDays = 30) {
   const db = getDb();
   return db.prepare(`
