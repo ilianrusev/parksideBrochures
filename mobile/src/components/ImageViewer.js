@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
+  Platform,
 } from 'react-native';
 
 const ASPECT_RATIO = 2400 / 1398;
@@ -34,10 +35,29 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
   const hasPrev = safeIndex > 0;
   const hasNext = safeIndex < pages.length - 1;
 
+  const handleShare = async () => {
+    if (Platform.OS === 'web' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Parkside — ${page.date_range}`,
+          text: `Parkside оферта, стр. ${page.page_number}`,
+          url: page.image_url,
+        });
+      } catch (e) {
+        // User cancelled or share failed
+      }
+    }
+  };
+
   return (
     <Modal visible={visible} animationType="fade" transparent={false} onRequestClose={onClose}>
       <View style={styles.container}>
         <View style={styles.header}>
+          {Platform.OS === 'web' && navigator.share ? (
+            <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
+              <Text style={styles.shareBtnText}>↗</Text>
+            </TouchableOpacity>
+          ) : <View style={styles.shareBtn} />}
           <Text style={styles.headerText}>
             {page.date_range}
           </Text>
@@ -125,6 +145,20 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   closeBtnText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  shareBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  shareBtnText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
