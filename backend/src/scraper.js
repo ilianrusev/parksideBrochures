@@ -4,7 +4,7 @@ import {
   insertParksidePage,
   clearBrochurePages,
   cleanupOldBrochures,
-  removeUnlistedBrochures,
+  markUnlistedBrochures,
 } from './db.js';
 
 const LIDL_URL = process.env.BROCHURE_URL;
@@ -208,16 +208,16 @@ export async function scrape() {
       }
     }
 
-    // Remove brochures no longer listed on source websites
+    // Archive brochures no longer listed on source websites
     const lidlUrls = lidlFlyers.map(f => f.url);
     const kauflandUrls = kauflandFlyers.map(f => f.url);
     if (lidlUrls.length > 0) {
-      const r = removeUnlistedBrochures('lidl', lidlUrls);
-      if (r.changes) console.log(`[scraper] Removed ${r.changes} old Lidl brochure(s)`);
+      const r = markUnlistedBrochures('lidl', lidlUrls);
+      if (r.changes) console.log(`[scraper] Archived ${r.changes} old Lidl brochure(s)`);
     }
     if (kauflandUrls.length > 0) {
-      const r = removeUnlistedBrochures('kaufland', kauflandUrls);
-      if (r.changes) console.log(`[scraper] Removed ${r.changes} old Kaufland brochure(s)`);
+      const r = markUnlistedBrochures('kaufland', kauflandUrls);
+      if (r.changes) console.log(`[scraper] Archived ${r.changes} old Kaufland brochure(s)`);
     }
 
     // Clean up old brochures

@@ -24,6 +24,7 @@ export function getDb() {
       url TEXT NOT NULL UNIQUE,
       source TEXT NOT NULL DEFAULT 'lidl',
       total_pages INTEGER DEFAULT 0,
+      is_current INTEGER DEFAULT 1,
       scraped_at TEXT DEFAULT (datetime('now'))
     );
 
@@ -38,6 +39,12 @@ export function getDb() {
       UNIQUE(brochure_id, page_number)
     );
   `);
+
+  // Add is_current column if missing (migration for existing DBs)
+  const cols = db.prepare("PRAGMA table_info(brochures)").all();
+  if (!cols.find(c => c.name === 'is_current')) {
+    db.exec('ALTER TABLE brochures ADD COLUMN is_current INTEGER DEFAULT 1');
+  }
 
   return db;
 }
@@ -78,6 +85,20 @@ export function getAllParksidePages() {
       b.id AS brochure_id, b.title, b.date_range, b.url AS brochure_url, b.source
     FROM parkside_pages pp
     JOIN brochures b ON b.id = pp.brochure_id
+    WHERE b.is_current = 1
+    ORDER BY b.scraped_at DESC, pp.page_number ASC
+  `).all();
+}
+
+export function getArchivedParksidePages() {
+  const db = getDb();
+  return db.prepare(`
+    SELECT
+      pp.id, pp.page_number, pp.image_url, pp.detected_by, pp.created_at,
+      b.id AS brochure_id, b.title, b.date_range, b.url AS brochure_url, b.source
+    FROM parkside_pages pp
+    JOIN brochures b ON b.id = pp.brochure_id
+    WHERE b.is_current = 0
     ORDER BY b.scraped_at DESC, pp.page_number ASC
   `).all();
 }
@@ -100,12 +121,18 @@ export function getParksidePagesByBrochure(brochureId) {
   `).all(brochureId);
 }
 
-export function removeUnlistedBrochures(source, currentUrls) {
+export function markUnlistedBrochures(source, currentUrls) {
   const db = getDb();
   if (!currentUrls.length) return { changes: 0 };
   const placeholders = currentUrls.map(() => '?').join(',');
+  // Mark currently listed brochures as current
+  db.prepare(`
+    UPDATE brochures SET is_current = 1
+    WHERE source = ? AND url IN (${placeholders})
+  `).run(source, ...currentUrls);
+  // Mark unlisted brochures as archived
   return db.prepare(`
-    DELETE FROM brochures
+    UPDATE brochures SET is_current = 0
     WHERE source = ? AND url NOT IN (${placeholders})
   `).run(source, ...currentUrls);
 }

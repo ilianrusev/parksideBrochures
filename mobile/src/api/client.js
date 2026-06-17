@@ -7,3 +7,11 @@ export async function fetchParksidePages() {
   }
   return res.json();
 }
+
+export async function fetchArchivedPages() {
+  const res = await fetch(`${API_BASE_URL}/pages/archive`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch archived pages: ${res.status}`);
+  }
+  return res.json();
+}

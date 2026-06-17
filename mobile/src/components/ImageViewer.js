@@ -20,8 +20,10 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
   const imageHeight = Math.min(imageWidth * ASPECT_RATIO, height - 100);
 
   useEffect(() => {
-    setCurrentIndex(initialIndex || 0);
-  }, [initialIndex]);
+    if (visible) {
+      setCurrentIndex(initialIndex || 0);
+    }
+  }, [visible, initialIndex]);
 
   if (!pages || pages.length === 0 || !visible) return null;
 

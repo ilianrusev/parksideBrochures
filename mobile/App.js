@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
-import { Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Platform, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './src/screens/HomeScreen';
+import ArchiveScreen from './src/screens/ArchiveScreen';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+
   useEffect(() => {
     if (Platform.OS === 'web') {
       const style = document.createElement('style');
@@ -49,7 +52,64 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />
-      <HomeScreen />
+      <View style={appStyles.container}>
+        {activeTab === 'home' ? <HomeScreen /> : <ArchiveScreen />}
+        <View style={appStyles.tabBar}>
+          <TouchableOpacity
+            style={[appStyles.tab, activeTab === 'home' && appStyles.tabActive]}
+            onPress={() => setActiveTab('home')}
+            activeOpacity={0.7}
+          >
+            <Text style={appStyles.tabIcon}>🔧</Text>
+            <Text style={[appStyles.tabText, activeTab === 'home' && appStyles.tabTextActive]}>
+              Актуални
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[appStyles.tab, activeTab === 'archive' && appStyles.tabActive]}
+            onPress={() => setActiveTab('archive')}
+            activeOpacity={0.7}
+          >
+            <Text style={appStyles.tabIcon}>📦</Text>
+            <Text style={[appStyles.tabText, activeTab === 'archive' && appStyles.tabTextActive]}>
+              Архив
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaProvider>
   );
 }
+
+const appStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'rgb(22, 24, 29)',
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: 'rgb(30, 32, 38)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgb(40, 42, 48)',
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+    paddingTop: 8,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  tabActive: {},
+  tabIcon: {
+    fontSize: 20,
+    marginBottom: 2,
+  },
+  tabText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#666',
+  },
+  tabTextActive: {
+    color: 'rgb(4, 65, 44)',
+  },
+});

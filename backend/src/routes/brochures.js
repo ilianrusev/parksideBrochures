@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getAllParksidePages,
+  getArchivedParksidePages,
   getBrochuresWithParksidePages,
   getParksidePagesByBrochure,
 } from '../db.js';
@@ -29,6 +30,12 @@ export function clearCache() {
 // GET /api/pages — all current Parkside pages (flat list for the mobile app)
 router.get('/pages', (req, res) => {
   const pages = cached('pages', getAllParksidePages);
+  res.json(pages);
+});
+
+// GET /api/pages/archive — archived Parkside pages from old brochures
+router.get('/pages/archive', (req, res) => {
+  const pages = cached('pages-archive', getArchivedParksidePages);
   res.json(pages);
 });
 
