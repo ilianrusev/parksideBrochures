@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -8,11 +8,15 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ScrollView,
+  PanResponder,
   Platform,
 } from 'react-native';
 import useBackGuard from '../hooks/useBackGuard';
 
 const ASPECT_RATIO = 2400 / 1398;
+const SWIPE_MIN_DISTANCE = 50;
+// A drag counts as a page swipe only when it is clearly more horizontal than vertical.
+const SWIPE_DIRECTION_RATIO = 1.5;
 
 export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex || 0);
@@ -20,6 +24,8 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
   const maxWidth = Math.min(width, 500);
   const imageWidth = maxWidth;
   const imageHeight = Math.min(imageWidth * ASPECT_RATIO, height - 100);
+  const pageCountRef = useRef(0);
+  const zoomScaleRef = useRef(1);
 
   useBackGuard(visible, onClose);
 
@@ -29,7 +35,32 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
     }
   }, [visible, initialIndex]);
 
+  // The zoomable ScrollView is remounted per page, so its zoom starts fresh.
+  useEffect(() => {
+    zoomScaleRef.current = 1;
+  }, [currentIndex]);
+
+  const panResponder = useMemo(() => {
+    const step = (delta) =>
+      setCurrentIndex((index) =>
+        Math.max(0, Math.min(index + delta, pageCountRef.current - 1))
+      );
+
+    return PanResponder.create({
+      onMoveShouldSetPanResponderCapture: (_evt, gesture) =>
+        zoomScaleRef.current <= 1.05 &&
+        Math.abs(gesture.dx) > 15 &&
+        Math.abs(gesture.dx) > Math.abs(gesture.dy) * SWIPE_DIRECTION_RATIO,
+      onPanResponderRelease: (_evt, gesture) => {
+        if (gesture.dx <= -SWIPE_MIN_DISTANCE) step(1);
+        else if (gesture.dx >= SWIPE_MIN_DISTANCE) step(-1);
+      },
+    });
+  }, []);
+
   if (!pages || pages.length === 0 || !visible) return null;
+
+  pageCountRef.current = pages.length;
 
   const safeIndex = Math.min(currentIndex, pages.length - 1);
   const page = pages[safeIndex];
@@ -71,7 +102,7 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
             <Text style={styles.closeBtnText}>✕</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.body}>
+        <View style={styles.body} {...panResponder.panHandlers}>
           {hasPrev && (
             <TouchableOpacity
               style={[styles.arrowBtn, styles.arrowLeft]}
@@ -88,6 +119,10 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
             maximumZoomScale={3}
             minimumZoomScale={1}
             bouncesZoom
+            scrollEventThrottle={16}
+            onScroll={(e) => {
+              zoomScaleRef.current = e.nativeEvent.zoomScale || 1;
+            }}
           >
             <Image
               source={{ uri: page.image_url }}
