@@ -10,6 +10,7 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
+import useBackGuard from '../hooks/useBackGuard';
 
 const ASPECT_RATIO = 2400 / 1398;
 
@@ -19,6 +20,8 @@ export default function ImageViewer({ pages, initialIndex, visible, onClose }) {
   const maxWidth = Math.min(width, 500);
   const imageWidth = maxWidth;
   const imageHeight = Math.min(imageWidth * ASPECT_RATIO, height - 100);
+
+  useBackGuard(visible, onClose);
 
   useEffect(() => {
     if (visible) {
@@ -173,7 +176,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',

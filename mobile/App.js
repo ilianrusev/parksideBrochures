@@ -4,9 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './src/screens/HomeScreen';
 import ArchiveScreen from './src/screens/ArchiveScreen';
+import useBackGuard from './src/hooks/useBackGuard';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
+
+  useBackGuard(activeTab !== 'home', () => setActiveTab('home'));
 
   useEffect(() => {
     if (Platform.OS === 'web') {
